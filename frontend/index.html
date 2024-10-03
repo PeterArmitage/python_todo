@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+        }
+        h1 {
+            text-align: center;
+        }
+        #taskInput {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: #34495e;
+            margin-bottom: 10px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .completed {
+            text-decoration: line-through;
+            color: #95a5a6;
+        }
+    </style>
+</head>
+<body>
+    <h1>My To-Do List</h1>
+    <input type="text" id="taskInput" placeholder="Enter a new task">
+    <button onclick="addTask()">Add Task</button>
+    <button onclick="saveTasks()">Save Tasks</button>
+    <button onclick="exportCompleted()">Export Completed</button>
+    <ul id="taskList"></ul>
+
+    <script>
+        const API_URL = 'http://localhost:5000'; // Change this to your deployed backend URL
+
+        async function fetchTasks() {
+            const response = await fetch(`${API_URL}/tasks`);
+            const tasks = await response.json();
+            renderTasks(tasks);
+        }
+
+        function renderTasks(tasks) {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleComplete(${index})">
+                    <span class="${task.completed ? 'completed' : ''}">${task.text}</span>
+                `;
+                taskList.appendChild(li);
+            });
+        }
+
+        async function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const text = taskInput.value.trim();
+            if (text) {
+                const response = await fetch(`${API_URL}/tasks`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, completed: false })
+                });
+                taskInput.value = '';
+                fetchTasks();
+            }
+        }
+
+        async function toggleComplete(index) {
+            const response = await fetch(`${API_URL}/tasks`);
+            const tasks = await response.json();
+            tasks[index].completed = !tasks[index].completed;
+            await fetch(`${API_URL}/tasks/${index}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(tasks[index])
+            });
+            fetchTasks();
+        }
+
+        async function saveTasks() {
+            alert('Tasks are automatically saved on the server.');
+        }
+
+        async function exportCompleted() {
+            const response = await fetch(`${API_URL}/export`);
+            const result = await response.json();
+            alert(result.message);
+        }
+
+        fetchTasks();
+    </script>
+</body>
+</html>
