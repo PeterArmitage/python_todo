@@ -20,6 +20,13 @@
             width: 100%;
             padding: 10px;
             margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
         }
         button {
             background-color: #3498db;
@@ -27,7 +34,7 @@
             border: none;
             padding: 10px 20px;
             cursor: pointer;
-            margin-right: 10px;
+            flex-grow: 1;
         }
         ul {
             list-style-type: none;
@@ -39,6 +46,12 @@
             padding: 10px;
             display: flex;
             align-items: center;
+            justify-content: space-between;
+        }
+        .task-content {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
         }
         .completed {
             text-decoration: line-through;
@@ -48,14 +61,24 @@
             background-color: #e74c3c;
             margin-left: 10px;
         }
+        @media (max-width: 480px) {
+            .button-container {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
     <h1>My To-Do List</h1>
     <input type="text" id="taskInput" placeholder="Enter a new task">
-    <button onclick="addTask()">Add Task</button>
-    <button onclick="saveTasks()">Save Tasks</button>
-    <button onclick="exportCompleted()">Export Completed</button>
+    <div class="button-container">
+        <button onclick="addTask()">Add Task</button>
+        <button onclick="saveTasks()">Save Tasks</button>
+        <button onclick="exportCompleted()">Export Completed</button>
+    </div>
     <ul id="taskList"></ul>
 
     <script>
@@ -78,9 +101,11 @@
             tasks.forEach((task, index) => {
                 const li = document.createElement('li');
                 li.innerHTML = `
-                    <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleComplete(${index})">
-                    <span class="${task.completed ? 'completed' : ''}">${task.text}</span>
-                    <button onclick="deleteTask(${index})">Delete</button>
+                    <div class="task-content">
+                        <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleComplete(${index})">
+                        <span class="${task.completed ? 'completed' : ''}">${task.text}</span>
+                    </div>
+                    <button class="delete" onclick="deleteTask(${index})">Delete</button>
                 `;
                 taskList.appendChild(li);
             });
@@ -152,12 +177,10 @@
             }
         }
         
-        
         window.onload = function() {
             checkAPI();
             fetchTasks();
         };
-        fetchTasks();
     </script>
 </body>
 </html>
