@@ -44,6 +44,10 @@
             text-decoration: line-through;
             color: #95a5a6;
         }
+        button.delete {
+            background-color: #e74c3c;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -68,7 +72,6 @@
                 alert('Failed to fetch tasks. Please try again later.');
             }
         }
-
         function renderTasks(tasks) {
             const taskList = document.getElementById('taskList');
             taskList.innerHTML = '';
@@ -77,11 +80,11 @@
                 li.innerHTML = `
                     <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleComplete(${index})">
                     <span class="${task.completed ? 'completed' : ''}">${task.text}</span>
+                    <button onclick="deleteTask(${index})">Delete</button>
                 `;
                 taskList.appendChild(li);
             });
         }
-
         async function addTask() {
             const taskInput = document.getElementById('taskInput');
             const text = taskInput.value.trim();
@@ -117,7 +120,18 @@
         async function saveTasks() {
             alert('Tasks are automatically saved on the server.');
         }
-
+        async function deleteTask(index) {
+            try {
+                const response = await fetch(`${API_URL}/tasks/${index}`, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) throw new Error('Failed to delete task');
+                fetchTasks(); 
+            } catch (error) {
+                console.error('Error deleting task:', error);
+                alert('Failed to delete task. Please try again.');
+            }
+        }
         async function exportCompleted() {
             const response = await fetch(`${API_URL}/export`);
             const result = await response.json();

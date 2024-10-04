@@ -55,5 +55,13 @@ def export_completed():
     
     return jsonify({"message": f"Completed tasks exported to {filename}"})
 
+@app.route('/tasks/<int:task_id>', methods=['DELETE'])
+def delete_task(task_id):
+    tasks = load_tasks()
+    if 0 <= task_id < len(tasks):
+        deleted_task = tasks.pop(task_id)
+        save_tasks(tasks)
+        return jsonify(deleted_task), 200
+    return jsonify({"error": "Task not found"}), 404
 if __name__ == '__main__':
     app.run(debug=True)
